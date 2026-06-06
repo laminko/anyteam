@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/anyteam-logo.png" alt="anyteam — one AI dev team, any agent harness" width="260">
+</p>
+
 # anyteam
 
 **One AI dev team, any agent harness.** A portable **hub-and-spoke specialist team**
