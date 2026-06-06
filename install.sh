@@ -2,6 +2,7 @@
 # install.sh — portable hub-and-spoke team installer
 # Requires: bash 3.2+  (NO associative arrays, NO ${var^^}, NO mapfile/readarray)
 # Usage: bash install.sh [--harness <id>] [--all] [--dir <project>] [--dry-run] [--force] [-h|--help]
+# In a terminal you'll be prompted to pick harness(es) + target dir (flags pre-fill the defaults).
 #
 # Detection markers (when no --harness/--all given):
 #   claude-code  : .claude/ directory OR CLAUDE.md
@@ -52,6 +53,13 @@ Auto-detection (when no --harness/--all given):
   gemini       : target dir contains .gemini/ or GEMINI.md
   codex        : ~/.codex/ directory exists (user-level)
   pi           : target dir contains .pi/
+
+Interactive prompts:
+  When run in a terminal, you are prompted to select harness(es)
+  (space-separated numbers/names, or 'all'; default: claude-code) and to
+  confirm the target project directory. Any flags you pass pre-fill these
+  prompts, so pressing Enter accepts them. Piped/non-interactive runs skip
+  the prompts and fall back to flags + auto-detection.
 
 Supported harnesses: claude-code opencode gemini codex pi
 USAGE
@@ -108,6 +116,95 @@ while [ $# -gt 0 ]; do
             ;;
     esac
 done
+
+# Disable pathname expansion while resolving harness/dir input below: typed
+# tokens (and flag values) are word-split but must never glob against the CWD.
+# Re-enabled (set +f) right before the install loop, which DOES rely on globbing.
+set -f
+
+# ---------------------------------------------------------------------------
+# Interactive selection (TTY only)
+# When attached to a terminal, confirm the harness selection and target
+# directory. Flags (or claude-code) seed the defaults, so pressing Enter
+# accepts them. Piped/CI runs (no TTY) skip this and use flags + auto-detect.
+# ---------------------------------------------------------------------------
+if [ -t 0 ]; then
+    # --- Harness selection (multi-select: numbers, names, or 'all') ---
+    if [ "$REQUESTED_HARNESSES" = "ALL" ]; then
+        _default_harnesses="$SUPPORTED_HARNESSES"
+    elif [ -n "$REQUESTED_HARNESSES" ]; then
+        _default_harnesses="$REQUESTED_HARNESSES"
+    else
+        _default_harnesses="claude-code"
+    fi
+
+    echo "Available harnesses:"
+    _i=0
+    for _s in $SUPPORTED_HARNESSES; do
+        _i=$((_i + 1))
+        echo "  ${_i}) ${_s}"
+    done
+    printf "Select harness(es) to install — space-separated numbers/names, or 'all' [%s]: " "$_default_harnesses"
+    read -r _reply || _reply=""
+    if [ -z "$_reply" ]; then
+        _reply="$_default_harnesses"
+    fi
+
+    # Resolve the reply into a space-separated list of harness names.
+    _reply="$(echo "$_reply" | tr ',' ' ')"
+    _selection=""
+    for _tok in $_reply; do
+        case "$_tok" in
+            all|ALL|All)
+                _selection="$SUPPORTED_HARNESSES"
+                break
+                ;;
+            *)
+                if echo "$_tok" | grep -q '^[0-9][0-9]*$'; then
+                    # numeric choice — map position to a harness name
+                    _j=0
+                    _match=""
+                    for _s in $SUPPORTED_HARNESSES; do
+                        _j=$((_j + 1))
+                        if [ "$_j" = "$_tok" ]; then
+                            _match="$_s"
+                            break
+                        fi
+                    done
+                    if [ -n "$_match" ]; then
+                        _selection="${_selection} ${_match}"
+                    else
+                        echo "  (ignoring out-of-range choice: ${_tok})" >&2
+                    fi
+                else
+                    # treat as a name; the validation step below rejects unknowns
+                    _selection="${_selection} ${_tok}"
+                fi
+                ;;
+        esac
+    done
+    _selection="${_selection# }"   # trim leading space
+    if [ -n "$_selection" ]; then
+        REQUESTED_HARNESSES="$_selection"
+    else
+        REQUESTED_HARNESSES="$_default_harnesses"
+    fi
+
+    # --- Target project directory ---
+    printf "Project directory to set up the team in [%s]: " "$TARGET_DIR"
+    read -r _reply || _reply=""
+    case "$_reply" in
+        "~")   _reply="$HOME" ;;
+        "~/"*) _reply="${HOME}/${_reply#"~/"}" ;;
+    esac
+    if [ -n "$_reply" ]; then
+        TARGET_DIR="$_reply"
+    fi
+    if [ ! -d "$TARGET_DIR" ]; then
+        echo "  (note: '${TARGET_DIR}' does not exist yet — it will be created)"
+    fi
+    echo ""
+fi
 
 # ---------------------------------------------------------------------------
 # Resolve harnesses to install
@@ -332,6 +429,7 @@ install_harness() {
 # ---------------------------------------------------------------------------
 # Run installs
 # ---------------------------------------------------------------------------
+set +f   # restore globbing — install_harness relies on "${_src}"/*.md expansion
 for _harness in $REQUESTED_HARNESSES; do
     echo ""
     echo "=== Installing harness: ${_harness} ==="

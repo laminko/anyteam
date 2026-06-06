@@ -36,10 +36,16 @@ and re-run the generator (see [Contributing](#contributing)).
 ```bash
 git clone https://github.com/laminko/anyteam.git
 cd anyteam
-bash install.sh                  # auto-detect the harness from the target project
+bash install.sh
 ```
 
-Or be explicit:
+Run in a terminal, the installer **prompts you** to pick the harness(es) to install
+(space-separated numbers/names, or `all`; default: `claude-code`) and to confirm the
+target project directory. Any flags you pass **pre-fill** those prompts, so pressing
+Enter accepts them.
+
+Or skip the prompts entirely with flags (also how piped / CI runs are driven — with no
+terminal the installer doesn't prompt and falls back to flags + auto-detection):
 
 ```bash
 bash install.sh --harness claude-code       # one harness
