@@ -12,7 +12,8 @@
       "tool_policy_map": {
         "full":      { "tools": "omit" },
         "read-only": { "tools": ["Read", "Grep", "Glob", "WebFetch"] },
-        "research":  { "tools": ["WebSearch", "WebFetch", "Read", "Write", "Grep", "Glob"] }
+        "research":  { "tools": ["WebSearch", "WebFetch", "Read", "Write", "Grep", "Glob"] },
+        "audit":     { "tools": ["Read", "Grep", "Glob", "WebFetch", "Bash"] }
       },
       "delegation_snippet": "claude-code.md"
     },
@@ -27,7 +28,8 @@
       "tool_policy_map": {
         "full":      {},
         "read-only": { "tools": { "write": false, "edit": false, "bash": false }, "permission": { "edit": "deny", "bash": "deny" } },
-        "research":  { "tools": { "write": true, "edit": false, "bash": false } }
+        "research":  { "tools": { "write": true, "edit": false, "bash": false } },
+        "audit":     { "tools": { "write": false, "edit": false, "bash": true }, "permission": { "edit": "deny", "bash": "allow" } }
       },
       "delegation_snippet": "opencode.md"
     },
@@ -42,7 +44,8 @@
       "tool_policy_map": {
         "full":      {},
         "read-only": { "tools": ["read_file", "read_many_files", "search_file_content", "glob"] },
-        "research":  { "tools": ["read_file", "search_file_content", "glob", "web_fetch", "google_web_search"] }
+        "research":  { "tools": ["read_file", "search_file_content", "glob", "web_fetch", "google_web_search"] },
+        "audit":     { "tools": ["read_file", "read_many_files", "search_file_content", "glob", "run_shell_command"] }
       },
       "delegation_snippet": "gemini.md"
     },
@@ -56,7 +59,8 @@
       "tool_policy_map": {
         "full":      { "sandbox_mode": "workspace-write" },
         "read-only": { "sandbox_mode": "read-only" },
-        "research":  { "sandbox_mode": "read-only" }
+        "research":  { "sandbox_mode": "read-only" },
+        "audit":     { "sandbox_mode": "read-only" }
       },
       "delegation_snippet": "codex.md"
     },
@@ -70,7 +74,8 @@
       "tool_policy_map": {
         "full":      {},
         "read-only": { "tools": "read, grep, find, ls" },
-        "research":  { "tools": "read, grep, find, ls" }
+        "research":  { "tools": "read, grep, find, ls" },
+        "audit":     { "tools": "read, grep, find, ls, bash" }
       },
       "extension": "@tintinweb/pi-subagents@0.10.0",
       "delegation_snippet": "pi.md"

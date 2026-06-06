@@ -58,7 +58,7 @@ MANUAL_SRC = os.path.join(SRC_DIR, "manual.md")
 ROLE_ORDER = ["pm", "architect", "be", "fe", "uiux-audit", "uiux-research"]
 
 VALID_MODEL_TIERS = {"heavy", "light"}
-VALID_TOOL_POLICIES = {"full", "read-only", "research"}
+VALID_TOOL_POLICIES = {"full", "read-only", "research", "audit"}
 
 # ---------------------------------------------------------------------------
 # Frontmatter parser
