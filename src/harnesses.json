@@ -11,7 +11,7 @@
       "key_map": { "name": "id", "description": "description", "model": "<model_map>", "tools": "<tool_policy>" },
       "tool_policy_map": {
         "full":      { "tools": "omit" },
-        "read-only": { "tools": ["Read", "Grep", "Glob", "Bash", "WebFetch"] },
+        "read-only": { "tools": ["Read", "Grep", "Glob", "WebFetch"] },
         "research":  { "tools": ["WebSearch", "WebFetch", "Read", "Write", "Grep", "Glob"] }
       },
       "delegation_snippet": "claude-code.md"
@@ -26,8 +26,8 @@
       "key_map": { "description": "description", "mode": "static", "model": "<model_map>", "tools": "<tool_policy>", "permission": "<tool_policy>" },
       "tool_policy_map": {
         "full":      {},
-        "read-only": { "tools": { "write": false, "edit": false }, "permission": { "edit": "deny" } },
-        "research":  { "tools": { "write": true, "edit": false } }
+        "read-only": { "tools": { "write": false, "edit": false, "bash": false }, "permission": { "edit": "deny", "bash": "deny" } },
+        "research":  { "tools": { "write": true, "edit": false, "bash": false } }
       },
       "delegation_snippet": "opencode.md"
     },
@@ -41,7 +41,7 @@
       "key_map": { "name": "id", "description": "description", "kind": "static", "model": "<model_map>", "tools": "<tool_policy>" },
       "tool_policy_map": {
         "full":      {},
-        "read-only": { "tools": ["read_file", "read_many_files", "search_file_content", "glob", "run_shell_command"] },
+        "read-only": { "tools": ["read_file", "read_many_files", "search_file_content", "glob"] },
         "research":  { "tools": ["read_file", "search_file_content", "glob", "web_fetch", "google_web_search"] }
       },
       "delegation_snippet": "gemini.md"

@@ -5,8 +5,10 @@ model: anthropic/claude-sonnet-4-6
 tools:
   write: false
   edit: false
+  bash: false
 permission:
   edit: deny
+  bash: deny
 ---
 
 You are the UI/UX Auditor. You critically review what exists and report problems with severity — you do not change code.
