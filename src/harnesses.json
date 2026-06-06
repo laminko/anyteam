@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "model_tiers": { "heavy": "opus", "light": "sonnet" },
+  "harnesses": {
+    "claude-code": {
+      "label": "Claude Code",
+      "instruction_file": "CLAUDE.md",
+      "roster": { "shape": "md-frontmatter", "dir": ".claude/agents", "scope": "project" },
+      "model_map": { "heavy": "opus", "light": "sonnet" },
+      "frontmatter_order": ["name", "description", "model", "tools"],
+      "key_map": { "name": "id", "description": "description", "model": "<model_map>", "tools": "<tool_policy>" },
+      "tool_policy_map": {
+        "full":      { "tools": "omit" },
+        "read-only": { "tools": ["Read", "Grep", "Glob", "Bash", "WebFetch"] },
+        "research":  { "tools": ["WebSearch", "WebFetch", "Read", "Write", "Grep", "Glob"] }
+      },
+      "delegation_snippet": "claude-code.md"
+    },
+    "opencode": {
+      "label": "OpenCode",
+      "instruction_file": "AGENTS.md",
+      "roster": { "shape": "md-frontmatter", "dir": ".opencode/agents", "scope": "project" },
+      "model_map": { "heavy": "anthropic/claude-opus-4-8", "light": "anthropic/claude-sonnet-4-6" },
+      "frontmatter_order": ["description", "mode", "model", "tools", "permission"],
+      "static_frontmatter": { "mode": "subagent" },
+      "key_map": { "description": "description", "mode": "static", "model": "<model_map>", "tools": "<tool_policy>", "permission": "<tool_policy>" },
+      "tool_policy_map": {
+        "full":      {},
+        "read-only": { "tools": { "write": false, "edit": false }, "permission": { "edit": "deny" } },
+        "research":  { "tools": { "write": true, "edit": false } }
+      },
+      "delegation_snippet": "opencode.md"
+    },
+    "gemini": {
+      "label": "Gemini CLI",
+      "instruction_file": "GEMINI.md",
+      "roster": { "shape": "md-frontmatter", "dir": ".gemini/agents", "scope": "project" },
+      "model_map": { "heavy": "gemini-2.5-pro", "light": "gemini-2.5-flash" },
+      "frontmatter_order": ["name", "description", "kind", "model", "tools"],
+      "static_frontmatter": { "kind": "local" },
+      "key_map": { "name": "id", "description": "description", "kind": "static", "model": "<model_map>", "tools": "<tool_policy>" },
+      "tool_policy_map": {
+        "full":      {},
+        "read-only": { "tools": ["read_file", "read_many_files", "search_file_content", "glob", "run_shell_command"] },
+        "research":  { "tools": ["read_file", "search_file_content", "glob", "web_fetch", "google_web_search"] }
+      },
+      "delegation_snippet": "gemini.md"
+    },
+    "codex": {
+      "label": "Codex CLI",
+      "instruction_file": "AGENTS.md",
+      "roster": { "shape": "toml", "dir": "agents", "scope": "user", "user_base": "~/.codex" },
+      "model_map": { "heavy": "gpt-5-codex", "light": "gpt-5-codex" },
+      "reasoning_effort_map": { "heavy": "high", "light": "medium" },
+      "toml_order": ["name", "description", "model", "model_reasoning_effort", "sandbox_mode", "developer_instructions"],
+      "tool_policy_map": {
+        "full":      { "sandbox_mode": "workspace-write" },
+        "read-only": { "sandbox_mode": "read-only" },
+        "research":  { "sandbox_mode": "read-only" }
+      },
+      "delegation_snippet": "codex.md"
+    },
+    "pi": {
+      "label": "Pi",
+      "instruction_file": "AGENTS.md",
+      "roster": { "shape": "md-frontmatter", "dir": ".pi/agents", "scope": "project" },
+      "model_map": { "heavy": "anthropic/claude-opus-4-8", "light": "anthropic/claude-sonnet-4-6" },
+      "frontmatter_order": ["description", "display_name", "model", "tools"],
+      "key_map": { "description": "description", "display_name": "display_name", "model": "<model_map>", "tools": "<tool_policy>" },
+      "tool_policy_map": {
+        "full":      {},
+        "read-only": { "tools": "read, grep, find, ls" },
+        "research":  { "tools": "read, grep, find, ls" }
+      },
+      "extension": "@tintinweb/pi-subagents",
+      "delegation_snippet": "pi.md"
+    }
+  }
+}
