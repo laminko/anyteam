@@ -39,6 +39,8 @@ This repo is built using the same hub-and-spoke specialist team it ships. The or
 | `fe` | Frontend Engineer | Client / UI implementation |
 | `uiux-audit` | UI/UX Auditor | Read-only usability/accessibility review |
 | `uiux-research` | UI/UX Researcher | Design patterns and evidence before building |
+| `security-research` | Security Researcher | Threat model + security requirements before building |
+| `security-audit` | Security Auditor | Read-only review of code/diffs for vulnerabilities (runs scanners) |
 
 The full orchestrator operating manual — including model policy, default feature flow, concurrency rules, and conventions — is in `src/manual.md`.
 

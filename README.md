@@ -6,9 +6,9 @@
 
 **One AI dev team, any agent harness.** A portable **hub-and-spoke specialist team**
 you can install into any of several AI coding harnesses with one command. The team is a small roster of role-specialised
-subagents — Product Manager, Architect, Backend, Frontend, and two UI/UX roles — plus
-an operating manual that tells the lead agent how to delegate to them and synthesise
-their work.
+subagents — Product Manager, Architect, Backend, Frontend, two UI/UX roles, and two
+security roles — plus an operating manual that tells the lead agent how to delegate to
+them and synthesise their work.
 
 One canonical source, rendered into each harness's native subagent format. Define the
 team once; install it everywhere.
@@ -26,7 +26,8 @@ predefined named specialists) are supported.
 | **Codex CLI** | `~/.codex/agents/*.toml` (user-level) | `AGENTS.md` | `gpt-5-codex` + reasoning effort |
 | **Pi** | `.pi/agents/*.md` | `AGENTS.md` | `anthropic/claude-*` |
 
-The lead role runs on the heavy tier; `pm` and `architect` are heavy, the rest are light.
+The lead role runs on the heavy tier; `pm`, `architect`, and the two security roles are
+heavy, the rest are light.
 Model ids are sensible defaults — tune them in [`src/harnesses.json`](src/harnesses.json)
 and re-run the generator (see [Contributing](#contributing)).
 
@@ -92,6 +93,8 @@ the bundled [`SKILL.md`](SKILL.md) wraps install + intake as a `/bootstrap-team`
 | `fe` | Frontend Engineer | Client / UI against the contract |
 | `uiux-audit` | UI/UX Auditor | Read-only usability / accessibility review |
 | `uiux-research` | UI/UX Researcher | Patterns / evidence before building |
+| `security-research` | Security Researcher | Threat model + security requirements before building |
+| `security-audit` | Security Auditor | Read-only review of code / diffs for vulnerabilities |
 
 The human talks to the **lead** (the main agent thread); the lead delegates to specialists
 and synthesises their results. Specialists do not talk to each other.

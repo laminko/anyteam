@@ -1,6 +1,6 @@
 ---
 name: bootstrap-team
-description: Bootstrap the portable hub-and-spoke specialist team (pm, architect, be, fe, uiux-audit, uiux-research) into a project — installs the agent roster + operating manual into the current AI coding harness, then runs a codebase intake so the team follows the project's stack, frameworks, and conventions. Use when starting the team on a new or existing project, onboarding the team, or when the user says "bootstrap team", "onboard the team", or "set up the team here".
+description: Bootstrap the portable hub-and-spoke specialist team (pm, architect, be, fe, uiux-audit, uiux-research, security-research, security-audit) into a project — installs the agent roster + operating manual into the current AI coding harness, then runs a codebase intake so the team follows the project's stack, frameworks, and conventions. Use when starting the team on a new or existing project, onboarding the team, or when the user says "bootstrap team", "onboard the team", or "set up the team here".
 ---
 
 # Bootstrap Team
@@ -19,7 +19,7 @@ bash <SKILL_DIR>/install.sh [--harness <id>] [--dir <project>]
 
 With no `--harness` it auto-detects from the project; inside Claude Code that resolves
 to `claude-code`. Supported harnesses: **claude-code, opencode, gemini, codex, pi**.
-It copies the 6 agents into the harness's roster directory (no-clobber) and writes the
+It copies the 8 agents into the harness's roster directory (no-clobber) and writes the
 team manual as the harness's instruction file. Report what was added/skipped and any
 per-harness note the installer prints (Codex installs the roster user-level; Pi subagents
 need a separate, opt-in third-party extension — the installer asks the user for consent,
