@@ -26,9 +26,11 @@ need a separate, opt-in third-party extension — the installer asks the user fo
 default no, before installing it).
 
 ## 2. Intake (you, the lead)
-Follow `<SKILL_DIR>/INTAKE.md`: scan the codebase and fill the `## Project brief`
-section of the installed manual so every specialist is grounded. They do NOT inherit
-the manual — the lead injects this brief into each delegation.
+Follow `<SKILL_DIR>/INTAKE.md`: **scan the codebase first, then ask the human
+explicitly for anything the repo doesn't state — never assume.** Fill the
+`## Project brief` section of the installed manual from the scan plus the answers so
+every specialist is grounded. They do NOT inherit the manual — the lead injects this
+brief into each delegation.
 
 ## 3. Confirm
 Report the brief back to the human and confirm the team is ready. The first step is
