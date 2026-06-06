@@ -51,8 +51,41 @@ This workspace runs as a **hub-and-spoke team**. The main Claude thread is the *
 2. **Plan** the delegation: which specialists, in what order, what can run in parallel.
 3. **Delegate** via your harness's subagent/delegation mechanism (see 'Delegating & fan-out' below). Give each specialist the context it needs (the spec, the contract, the relevant files) — subagents start with a clean context and only know what you tell them.
    - **ALWAYS prepend the Team principles (above) to every delegation prompt.** Subagents do NOT inherit this file (verified) — they only know what you put in their prompt. Propagating the principles on each handoff is the orchestrator's job and is non-negotiable.
+   - **Record each specialist's output in the shared artifact** (see below) and pass downstream specialists the artifact *path* plus the sections to read, instead of re-pasting upstream outputs into every prompt.
 4. **Concurrency rule — parallel reads, sequential writes.** Read-only work (research, browsing, exploration, audits, search) MAY fan out in parallel. Any work that **writes or updates** files (implementation, refactor, migration, doc edits) runs **one agent at a time, sequentially** — never two writers in flight at once, even on disjoint files. Run dependent work as a pipeline (one specialist's output feeds the next).
 5. **Synthesize** results and report to the human. Surface open questions and assumptions for human decision.
+
+## Shared artifact (the blackboard)
+For any multi-step feature, the lead keeps a single per-feature working file —
+`.team/<feature-slug>.md` — as the team's shared memory. It is the durable handoff medium:
+it survives the lead's context being summarized, gives one source of truth, and replaces
+re-pasting upstream outputs into every prompt.
+
+- **The lead is the sole writer.** After each specialist returns its report, the lead writes
+  the relevant section; specialists only *read* the file. This is not a style choice —
+  `research`-policy roles cannot write files on several harnesses, but every role can read on
+  every harness, so lead-curated is the only portable design.
+- **Pass the path, not the paste.** Delegations reference the artifact (e.g. "read
+  `## Contract` and `## Security requirements` in `.team/<feature>.md`") instead of pasting
+  those outputs verbatim. The Team principles and Project brief are still injected in-prompt —
+  they are cross-feature and small.
+- **Structure** — sections accrue down the pipeline, each filled by the lead from a
+  specialist's returned report:
+
+  ```
+  # Feature: <name>   ·   Goal: <one line>
+  ## Spec                    ← pm
+  ## Contract                ← architect
+  ## Security requirements   ← security-research (SR-1..N)
+  ## Implementation log      ← what be/fe did, per slice
+  ## Review findings         ← uiux-audit + security-audit
+  ## Open questions          ← lead
+  ```
+
+- **Lifecycle.** The lead creates the file after clarifying the goal and adds `.team/` to
+  `.gitignore` (it is coordination scratch, not source). Skip the artifact for a trivial
+  single-step change — a one-line report is enough; use it once work spans more than one
+  specialist.
 
 ## Default flow for a feature
 1. `pm` → spec + task breakdown
@@ -89,7 +122,7 @@ Rules that keep sequential writes clean:
 
 
 ## Conventions
-- Pass each specialist the *outputs* of upstream specialists (e.g. give BE and FE the Architect's contract verbatim).
+- Record each specialist's output in the shared artifact, then pass downstream specialists the artifact path + the sections to read (instead of re-pasting outputs verbatim). For a trivial single-step task, passing the report directly is fine.
 - Specialists return a structured report as their final message — that report is their handoff, not a chat message to the human.
 - Reviewers (`uiux-audit`, `security-audit`) are read-only; route their findings to `be`/`fe` to apply.
 - Do not claim work is done or verified unless the specialist actually ran and verified it.
