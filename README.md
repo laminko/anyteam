@@ -116,46 +116,32 @@ every prompt. Security is traceable end to end — `security-research` emits num
 requirements (`SR-n`) that `be`/`fe` build to and `security-audit` verifies against.
 
 ```mermaid
-sequenceDiagram
-    actor Human
-    participant Lead as Orchestrator / lead
-    participant BB as .team blackboard
-    participant PM as pm
-    participant Arch as architect
-    participant Sec as security-research
-    participant Eng as be / fe
-    participant Aud as uiux-audit / security-audit
+flowchart TD
+    Human(["Human"])
+    Lead{{"Orchestrator / Lead<br/>· also PM scoping"}}
+    BB[("Shared blackboard<br/>.team/&lt;feature&gt;.md")]
+    Arch["architect"]
+    Eng["be · fe"]
+    Sec["security-research · security-audit"]
 
-    Note over PM,Aud: specialists never talk to each other — every handoff routes through the lead
+    Human <-->|"goal · synthesis"| Lead
 
-    Human->>Lead: feature goal
+    Lead <--> Arch
+    Lead <--> Eng
+    Lead <--> Sec
 
-    Lead->>PM: spec?
-    PM-->>Lead: spec + task breakdown
-    Note over Lead,BB: writes ## Spec
-
-    Lead->>Arch: contract? (reads ## Spec)
-    Arch-->>Lead: data model + API contract
-    Note over Lead,BB: writes ## Contract
-
-    Lead->>Sec: threat-model the contract
-    Sec-->>Lead: SR-1..N (testable, owned)
-    Note over Lead,BB: writes ## Security requirements
-
-    Lead->>Eng: build to ## Contract + ## Security requirements
-    Eng-->>Lead: implementation
-    Note over Lead,BB: writes ## Implementation log
-
-    Lead->>Aud: review diff (SR-n = checklist)
-    Aud-->>Lead: findings keyed to SR-n (or NEW)
-    Note over Lead,BB: writes ## Review findings
-
-    alt unmet SR-n
-        Lead->>Eng: apply fixes, then lead re-audits
-    end
-
-    Lead->>Human: synthesis + open questions
+    Lead ==>|"sole writer"| BB
+    BB -.->|"spec"| Arch
+    BB -.->|"contract · SR-n"| Eng
+    BB -.->|"contract · diff"| Sec
 ```
+
+The lead is the hub: it delegates to each specialist and synthesises their reports
+(double-headed arrows). **Specialists never talk to each other** — the only shared
+state is the blackboard, which the lead alone writes and specialists read (dashed
+arrows: e.g. `be`/`fe` build against the `## Contract` and the `SR-n` requirements).
+Simplified for clarity — see the full roster (incl. `pm`, `uiux-research`,
+`uiux-audit`) in [The team](#the-team) above.
 
 The full operating manual ships as each harness's instruction file (`CLAUDE.md`, `AGENTS.md`,
 `GEMINI.md`); the canonical source is [`src/manual.md`](src/manual.md).
