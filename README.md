@@ -99,6 +99,19 @@ the bundled [`SKILL.md`](SKILL.md) wraps install + intake as a `/bootstrap-team`
 The human talks to the **lead** (the main agent thread); the lead delegates to specialists
 and synthesises their results. Specialists do not talk to each other.
 
+## How the team works
+
+A feature flows through a pipeline the lead adapts per task — `pm` (spec) → `architect`
+(contract) → `security-research` (threat model) → `be`/`fe` (build) → `uiux-audit` +
+`security-audit` (review) — and the lead synthesises the result. Coordination runs over a
+**shared blackboard**: the lead curates a per-feature `.team/<feature>.md` (spec, contract,
+security requirements, findings) that specialists *read*, instead of re-pasting context into
+every prompt. Security is traceable end to end — `security-research` emits numbered
+requirements (`SR-n`) that `be`/`fe` build to and `security-audit` verifies against.
+
+The full operating manual ships as each harness's instruction file (`CLAUDE.md`, `AGENTS.md`,
+`GEMINI.md`); the canonical source is [`src/manual.md`](src/manual.md).
+
 ## Contributing
 
 The repo is the **source + build system**, not a pile of hand-written configs:
