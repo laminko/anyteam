@@ -48,11 +48,11 @@ Or skip the prompts entirely with flags (also how piped / CI runs are driven —
 terminal the installer doesn't prompt and falls back to flags + auto-detection):
 
 ```bash
-bash install.sh --harness claude-code       # one harness
-bash install.sh --harness opencode,pi       # several
-bash install.sh --all                        # every supported harness
-bash install.sh --dir /path/to/project       # target a different project
-bash install.sh --dry-run                    # show what would happen, copy nothing
+bash install.sh --harness claude-code   # one harness
+bash install.sh --harness opencode,pi   # several
+bash install.sh --all                   # every supported harness
+bash install.sh --dir /path/to/project  # target a different project
+bash install.sh --dry-run               # show what would happen, copy nothing
 ```
 
 The installer is **no-clobber by default** (it skips files that already exist; pass
@@ -114,6 +114,48 @@ A feature flows through a pipeline the lead adapts per task — `pm` (spec) → 
 security requirements, findings) that specialists *read*, instead of re-pasting context into
 every prompt. Security is traceable end to end — `security-research` emits numbered
 requirements (`SR-n`) that `be`/`fe` build to and `security-audit` verifies against.
+
+```mermaid
+sequenceDiagram
+    actor Human
+    participant Lead as Orchestrator / lead
+    participant BB as .team blackboard
+    participant PM as pm
+    participant Arch as architect
+    participant Sec as security-research
+    participant Eng as be / fe
+    participant Aud as uiux-audit / security-audit
+
+    Note over PM,Aud: specialists never talk to each other — every handoff routes through the lead
+
+    Human->>Lead: feature goal
+
+    Lead->>PM: spec?
+    PM-->>Lead: spec + task breakdown
+    Note over Lead,BB: writes ## Spec
+
+    Lead->>Arch: contract? (reads ## Spec)
+    Arch-->>Lead: data model + API contract
+    Note over Lead,BB: writes ## Contract
+
+    Lead->>Sec: threat-model the contract
+    Sec-->>Lead: SR-1..N (testable, owned)
+    Note over Lead,BB: writes ## Security requirements
+
+    Lead->>Eng: build to ## Contract + ## Security requirements
+    Eng-->>Lead: implementation
+    Note over Lead,BB: writes ## Implementation log
+
+    Lead->>Aud: review diff (SR-n = checklist)
+    Aud-->>Lead: findings keyed to SR-n (or NEW)
+    Note over Lead,BB: writes ## Review findings
+
+    alt unmet SR-n
+        Lead->>Eng: apply fixes, then lead re-audits
+    end
+
+    Lead->>Human: synthesis + open questions
+```
 
 The full operating manual ships as each harness's instruction file (`CLAUDE.md`, `AGENTS.md`,
 `GEMINI.md`); the canonical source is [`src/manual.md`](src/manual.md).
