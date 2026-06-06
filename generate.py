@@ -147,6 +147,15 @@ def validate_meta(meta, path):
         raise ValueError(
             f"{path}: tool_policy='{meta['tool_policy']}' not in {VALID_TOOL_POLICIES}"
         )
+    # Defense-in-depth: keep id path/identifier-safe and description single-line, so
+    # neither can escape the generated path or inject sibling frontmatter keys.
+    _idset = "abcdefghijklmnopqrstuvwxyz0123456789-"
+    if not meta["id"] or meta["id"][0] == "-" or any(c not in _idset for c in meta["id"]):
+        raise ValueError(
+            f"{path}: id='{meta['id']}' must be lowercase letters/digits/'-' (no leading '-')"
+        )
+    if "\n" in meta["description"] or "\r" in meta["description"]:
+        raise ValueError(f"{path}: description must be a single line (no newlines)")
 
 
 # ---------------------------------------------------------------------------
@@ -448,8 +457,13 @@ def render_harness(harness_id, harness_cfg, roles):
 def write_files(harness_id, rendered):
     """Write rendered files to dist/<harness_id>/."""
     base = os.path.join(DIST_DIR, harness_id)
+    base_abs = os.path.realpath(base)
     for rel, content in rendered.items():
         dest = os.path.join(base, rel)
+        # Defense-in-depth: never write outside dist/<harness>/ even if a harness
+        # config supplied an absolute path or '..' in dir/id/instruction_file.
+        if os.path.commonpath([base_abs, os.path.realpath(dest)]) != base_abs:
+            raise ValueError(f"refusing to write outside dist/{harness_id}/: {rel!r}")
         os.makedirs(os.path.dirname(dest), exist_ok=True)
         with open(dest, "w", encoding="utf-8", newline="\n") as fh:
             fh.write(content)
