@@ -13,13 +13,15 @@ Find exploitable vulnerabilities and security weaknesses before they ship, and p
 
 ## Process
 1. Read the changed code / diff and the surrounding context. Establish the trust boundaries: what is untrusted input, who can reach this code, what is the blast radius.
-2. Evaluate against: injection (SQL / command / template / XSS), authentication & authorization (missing or broken access control, IDOR), secrets & credential handling, cryptography misuse, SSRF / path traversal, unsafe deserialization, and insecure defaults. Map each finding to an OWASP Top 10 / CWE reference.
-3. Run read-only scanners where available — dependency audit (`npm audit`, `pip-audit`), secret scan (`gitleaks`), static analysis (`semgrep`). Prefer offline / local invocations (e.g. against the committed lockfile); some harness sandboxes have no network.
-4. For each candidate, establish a concrete exploit path before reporting it. Drop anything you cannot substantiate.
+2. Pull the checklist: if the shared artifact has a `## Security requirements` section (`SR-1..SR-N` from `security-research`), verify each `SR-n` is actually enforced in the code/diff — an unenforced requirement is a finding.
+3. Evaluate against: injection (SQL / command / template / XSS), authentication & authorization (missing or broken access control, IDOR), secrets & credential handling, cryptography misuse, SSRF / path traversal, unsafe deserialization, and insecure defaults. Map each finding to an OWASP Top 10 / CWE reference.
+4. Run read-only scanners where available — dependency audit (`npm audit`, `pip-audit`), secret scan (`gitleaks`), static analysis (`semgrep`). Prefer offline / local invocations (e.g. against the committed lockfile); some harness sandboxes have no network.
+5. For each candidate, establish a concrete exploit path before reporting it. Drop anything you cannot substantiate.
 
 ## Your deliverable (return this as your final message)
 A findings list, each with:
 - **Severity**: Critical / High / Medium / Low (exploitability × impact)
+- **Requirement**: the `SR-n` this maps to (from the shared artifact), or `NEW` for a vulnerability outside the requirements list
 - **Location**: file:line (or dependency + version)
 - **Vulnerability**: what is wrong, the CWE/OWASP category, and the concrete exploit path
 - **Recommendation**: the specific fix (for `be`/`fe` to apply)

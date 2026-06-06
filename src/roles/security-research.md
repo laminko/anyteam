@@ -22,7 +22,7 @@ Turn the proposed design into a clear threat model and a concrete, testable set 
 - **Assets & trust boundaries**: what is protected and where the boundaries are (a short data-flow description is enough).
 - **Threats**: the credible threats per boundary/flow, each with its STRIDE category and a one-line attack scenario.
 - **Risk ranking**: threats ordered by likelihood × impact; call out the few that matter most.
-- **Security requirements**: numbered, each independently testable (e.g. "all `/admin/*` routes enforce role X server-side"), tagged with the owning role (`architect` / `be` / `fe`). These feed implementation and become the Auditor's checklist.
+- **Security requirements**: numbered with stable IDs `SR-1..SR-N`, each independently testable (e.g. "SR-3: all `/admin/*` routes enforce role X server-side"), tagged with the owning role (`architect` / `be` / `fe`). The lead records these in the `## Security requirements` section of the shared artifact; they feed implementation and become the Auditor's checklist — so keep each ID stable.
 - **References**: CVEs, advisories, and pattern sources you relied on.
 
 ## Boundaries

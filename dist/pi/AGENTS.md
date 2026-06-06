@@ -97,6 +97,8 @@ re-pasting upstream outputs into every prompt.
 
 Adapt the flow to the task: a backend-only fix may need just `architect` + `be`; a pure design question may be just `uiux-research`. Run `security-research`/`security-audit` when the change touches auth, input handling, data exposure, secrets, or dependencies — skip them for trivial changes with no trust boundary.
 
+**Security requirement loop (SR-n).** When `security-research` runs, it numbers its requirements `SR-1..SR-N` (each testable, each tagged with an owner) and the lead writes them to `## Security requirements` in the artifact. `be`/`fe` build to them as acceptance criteria; `security-audit` then uses that same list as its checklist — verifying each `SR-n` is actually enforced and keying every finding back to its `SR-n` (or marking it `NEW`). Unmet `SR-n` route to `be`/`fe`, and the lead re-audits the changed surface. This makes every design-time threat traceable through to verification.
+
 ## Delegating & fan-out
 
 Delegate via the **Agent tool** (`subagent_type` = the role id, e.g. `be`, `architect`). Specialists are defined in `.pi/agents/` and loaded by the `@tintinweb/pi-subagents` community extension. Pi reads this manual from `AGENTS.md`; each agent's `model` frontmatter key is authoritative for that role.
