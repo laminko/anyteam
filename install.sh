@@ -184,6 +184,14 @@ _copy_one() {
     _cdest="$2"
     _crel="$3"
 
+    # Never write THROUGH a symlink at the destination (symlink-redirect attack:
+    # a pre-planted dest symlink — even a dangling one — would make cp follow it
+    # and write outside the intended tree).
+    if [ -L "$_cdest" ]; then
+        echo "refused (symlink dest, not following): ${_crel}" >&2
+        return
+    fi
+
     if [ "$DRY_RUN" = "1" ]; then
         if [ -e "$_cdest" ]; then
             echo "dry-run skip (exists): ${_crel}"
@@ -197,8 +205,8 @@ _copy_one() {
         echo "skip  (exists): ${_crel}"
         _skipped=$((_skipped + 1))
     else
-        mkdir -p "$(dirname "$_cdest")"
-        cp "$_csrc" "$_cdest"
+        mkdir -p -- "$(dirname -- "$_cdest")"
+        cp -- "$_csrc" "$_cdest"
         echo "added         : ${_crel}"
         _added=$((_added + 1))
     fi
@@ -259,8 +267,14 @@ install_harness() {
     done
 
     while IFS= read -r _abs; do
-        _rel="${_abs#${_src}/}"
+        _rel="${_abs:${#_src}+1}"
         _dest="${TARGET_DIR}/${_rel}"
+
+        # Never write THROUGH a symlink at the destination (symlink-redirect attack).
+        if [ -L "$_dest" ]; then
+            echo "refused (symlink dest, not following): ${_rel}" >&2
+            continue
+        fi
 
         if [ "$DRY_RUN" = "1" ]; then
             if [ -e "$_dest" ]; then
@@ -278,8 +292,8 @@ install_harness() {
             fi
             _skipped=$((_skipped + 1))
         else
-            mkdir -p "$(dirname "$_dest")"
-            cp "$_abs" "$_dest"
+            mkdir -p -- "$(dirname -- "$_dest")"
+            cp -- "$_abs" "$_dest"
             echo "added         : ${_rel}"
             _added=$((_added + 1))
         fi
