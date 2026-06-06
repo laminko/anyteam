@@ -4,7 +4,7 @@ Delegate via the **Agent tool** (`subagent_type` = the role id, e.g. `be`, `arch
 
 **Two-part install required.** Roster files under `.pi/agents/` are inert until the extension is installed and the project folder is trusted. The extension is a **third-party community package** (MIT, maintained outside anyteam) — installing it is opt-in — at your discretion, pinned to a version you've reviewed: `pi install npm:@tintinweb/pi-subagents@0.10.0`. Trust gate: Pi activates project files only after the user runs the trust prompt for the project.
 
-Per-agent tool restrictions are enforced via the `tools` key (comma-separated allowlist). Read-only and research roles are restricted to `read, grep, find, ls`; full-policy roles inherit all tools.
+Per-agent tool restrictions are enforced via the `tools` key (comma-separated allowlist). Read-only and research roles are restricted to `read, grep, find, ls`; the `audit` role (`security-audit`) adds `bash` for scanners but omits `write`/`edit`; full-policy roles inherit all tools.
 
 **Concurrency rule — parallel reads, sequential writes.** Read-only work (research, browsing, exploration, audits, search) MAY fan out in parallel — multiple Agent calls in one message. Any work that **writes or updates** files (implementation, refactor, migration, doc edits) runs **one agent at a time, sequentially** — never two writers in flight at once, even on disjoint files. Run dependent work as a pipeline (one specialist's output feeds the next).
 
@@ -14,8 +14,9 @@ Per-agent tool restrictions are enforced via the `tools` key (comma-separated al
 rule above**: reads parallel, writes sequential.
 
 - **Read / research / audit fan-out is parallel.** `uiux-research`, `uiux-audit`,
-  and architect exploration reads may run as many concurrently as useful (cap at ~3–5
-  so results stay synthesizable).
+  `security-research`, `security-audit`, and architect exploration reads may run as many
+  concurrently as useful (cap at ~3–5 so results stay synthesizable). `security-audit`
+  runs read-only scanners (`bash`) only — never state-changing commands.
 - **Write / implementation fan-out is sequential.** Run implementation instances **one at a
   time** even when slices are disjoint: dispatch `be-brand`, let it finish and integrate,
   then dispatch `be-category`. Sharding still matters — it's how you plan the sequence and

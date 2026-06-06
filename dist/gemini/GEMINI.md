@@ -21,11 +21,14 @@ This workspace runs as a **hub-and-spoke team**. The main Claude thread is the *
 | `fe` | Frontend Engineer | Client / UI implementation against the contract |
 | `uiux-audit` | UI/UX Auditor | Read-only review of existing UI for usability/accessibility |
 | `uiux-research` | UI/UX Researcher | Evidence/patterns to inform design before building |
+| `security-research` | Security Researcher | Threat model + security requirements before building |
+| `security-audit` | Security Auditor | Read-only review of code/diffs for vulnerabilities (runs scanners) |
 
 ## Model policy
 - **Team-lead (orchestrator / main thread): heavy tier (Opus-class)** — the lead does decomposition, routing, and synthesis.
 - **`pm`: heavy tier** — strategic scoping and spec work.
 - **`architect`: heavy tier** — heavy design reasoning, contracts, tradeoffs.
+- **`security-research`, `security-audit`: heavy tier** — adversarial threat modeling and subtle vulnerability review are high cost to miss.
 - **`be`, `fe`, `uiux-audit`, `uiux-research`: light tier (Sonnet-class)** — the default for the team's workers.
 - Each subagent takes its model from its own definition; changing a role's model means editing that role's definition.
 > On this harness, the **heavy** tier = `gemini-2.5-pro`, the **light** tier = `gemini-2.5-flash`.
@@ -54,11 +57,12 @@ This workspace runs as a **hub-and-spoke team**. The main Claude thread is the *
 ## Default flow for a feature
 1. `pm` → spec + task breakdown
 2. `architect` → data model + API contract (optionally `uiux-research` in parallel for design patterns)
-3. **parallel:** `be` (API) + `fe` (UI against the contract)
-4. `uiux-audit` → review the FE result
-5. orchestrator synthesizes → report to human
+3. `security-research` → threat model + security requirements against the contract (feeds `be`/`fe`)
+4. **parallel:** `be` (API) + `fe` (UI against the contract + security requirements)
+5. **parallel review:** `uiux-audit` + `security-audit` → findings route to `be`/`fe` to apply
+6. orchestrator synthesizes → report to human
 
-Adapt the flow to the task: a backend-only fix may need just `architect` + `be`; a pure design question may be just `uiux-research`.
+Adapt the flow to the task: a backend-only fix may need just `architect` + `be`; a pure design question may be just `uiux-research`. Run `security-research`/`security-audit` when the change touches auth, input handling, data exposure, secrets, or dependencies — skip them for trivial changes with no trust boundary.
 
 ## Delegating & fan-out
 
@@ -66,7 +70,7 @@ Delegate by auto-routing on `description` (Gemini CLI dispatches based on matchi
 
 **Gemini-specific notes:**
 - **Flat subagents**: Gemini subagents cannot sub-delegate — they are leaf nodes. This fits hub-and-spoke naturally: only the lead (your main session) delegates; specialists report back to you.
-- **Tool restrictions**: `full`-policy roles inherit all tools. `read-only` roles (uiux-audit) and `research` roles (uiux-research) receive an explicit tool allowlist. **ASSUMPTION**: the tool names in the agent files (`read_file`, `read_many_files`, `search_file_content`, `glob`, `run_shell_command`, `web_fetch`, `google_web_search`) are best-guess names based on common Gemini CLI conventions — they are **unverified** against the live tool registry. Correct them with a one-line edit to `src/harnesses.json` after a smoke test confirms the actual names.
+- **Tool restrictions**: `full`-policy roles inherit all tools. `read-only` (`uiux-audit`), `research` (`uiux-research`, `security-research`), and `audit` (`security-audit`) roles receive an explicit tool allowlist. These tool names (`read_file`, `read_many_files`, `search_file_content`, `glob`, `run_shell_command`, `web_fetch`, `google_web_search`) are **verified against the `google-gemini/gemini-cli` source**: the shell tool is `run_shell_command`; the write/edit tools are `write_file`/`replace`, which are omitted from every non-`full` role. Caveat: on bleeding-edge `main`, `search_file_content` was renamed `grep_search` — if you target that build, update the name in `src/harnesses.json`.
 
 **Concurrency rule — parallel reads, sequential writes.** Read-only work (research, browsing, exploration, audits, search) MAY fan out in parallel — multiple delegations in one message. Any work that **writes or updates** files (implementation, refactor, migration, doc edits) runs **one agent at a time, sequentially** — never two writers in flight at once, even on disjoint files. Run dependent work as a pipeline (one specialist's output feeds the next).
 
@@ -76,8 +80,9 @@ Delegate by auto-routing on `description` (Gemini CLI dispatches based on matchi
 rule above**: reads parallel, writes sequential.
 
 - **Read / research / audit fan-out is parallel.** `uiux-research`, `uiux-audit`,
-  and architect exploration reads may run as many concurrently as useful (cap at ~3–5
-  so results stay synthesizable).
+  `security-research`, `security-audit`, and architect exploration reads may run as many
+  concurrently as useful (cap at ~3–5 so results stay synthesizable). `security-audit`
+  runs read-only scanners (`run_shell_command`) only — never state-changing commands.
 - **Write / implementation fan-out is sequential.** Run implementation instances **one at a
   time** even when slices are disjoint: dispatch `be-brand`, let it finish and integrate,
   then dispatch `be-category`. Sharding still matters — it's how you plan the sequence and
@@ -94,5 +99,5 @@ Rules that keep sequential writes clean:
 ## Conventions
 - Pass each specialist the *outputs* of upstream specialists (e.g. give BE and FE the Architect's contract verbatim).
 - Specialists return a structured report as their final message — that report is their handoff, not a chat message to the human.
-- Reviewers (`uiux-audit`) are read-only; route their findings to `fe` to apply.
+- Reviewers (`uiux-audit`, `security-audit`) are read-only; route their findings to `be`/`fe` to apply.
 - Do not claim work is done or verified unless the specialist actually ran and verified it.

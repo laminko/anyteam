@@ -10,8 +10,10 @@ Delegate via the Agent tool. Give each specialist the context it needs (the spec
 rule above**: reads parallel, writes sequential.
 
 - **Read / research / audit fan-out is parallel.** `Explore`, `uiux-research`, `uiux-audit`,
-  and architect/Explore reads may run as many concurrently as useful (still cap noisy
-  read swarms at ~3–5 so results stay synthesizable).
+  `security-research`, `security-audit`, and architect/Explore reads may run as many
+  concurrently as useful (still cap noisy read swarms at ~3–5 so results stay synthesizable).
+  `security-audit` has shell access for scanners but is read-only by mandate — its boundary
+  forbids state-changing commands, so it still fans out as a reader.
 - **Write / implementation fan-out is sequential.** Run implementation instances **one at a
   time** even when slices are disjoint: dispatch `be-brand`, let it finish and integrate,
   then dispatch `be-category`. Sharding still matters — it's how you plan the sequence and

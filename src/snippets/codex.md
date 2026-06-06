@@ -11,7 +11,7 @@ Delegate by spawning subagents explicitly: the lead receives a task, then spawns
 (`/api/v1/brand` → `be-brand`, each FE area → `fe-<area>`). Fan-out obeys the **concurrency
 rule above**: reads parallel, writes sequential.
 
-- **Read / research / audit fan-out is parallel.** `uiux-research`, `uiux-audit`, and architect exploration may be spawned concurrently (cap at ~3–5 so results stay synthesizable).
+- **Read / research / audit fan-out is parallel.** `uiux-research`, `uiux-audit`, `security-research`, `security-audit`, and architect exploration may be spawned concurrently (cap at ~3–5 so results stay synthesizable). `security-audit` runs read-only scanners only — never state-changing commands. On Codex its `read-only` sandbox enforces this in the kernel (but has no network, so prefer offline scanners).
 - **Write / implementation fan-out is sequential.** Spawn implementation specialists **one at a time** even when slices are disjoint: finish `be-brand`, integrate, then spawn `be-category`.
 
 Rules that keep sequential writes clean:

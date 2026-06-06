@@ -21,11 +21,14 @@ This workspace runs as a **hub-and-spoke team**. The main Claude thread is the *
 | `fe` | Frontend Engineer | Client / UI implementation against the contract |
 | `uiux-audit` | UI/UX Auditor | Read-only review of existing UI for usability/accessibility |
 | `uiux-research` | UI/UX Researcher | Evidence/patterns to inform design before building |
+| `security-research` | Security Researcher | Threat model + security requirements before building |
+| `security-audit` | Security Auditor | Read-only review of code/diffs for vulnerabilities (runs scanners) |
 
 ## Model policy
 - **Team-lead (orchestrator / main thread): heavy tier (Opus-class)** — the lead does decomposition, routing, and synthesis.
 - **`pm`: heavy tier** — strategic scoping and spec work.
 - **`architect`: heavy tier** — heavy design reasoning, contracts, tradeoffs.
+- **`security-research`, `security-audit`: heavy tier** — adversarial threat modeling and subtle vulnerability review are high cost to miss.
 - **`be`, `fe`, `uiux-audit`, `uiux-research`: light tier (Sonnet-class)** — the default for the team's workers.
 - Each subagent takes its model from its own definition; changing a role's model means editing that role's definition.
 > On this harness, the **heavy** tier = `gpt-5-codex`, the **light** tier = `gpt-5-codex`.
@@ -54,11 +57,12 @@ This workspace runs as a **hub-and-spoke team**. The main Claude thread is the *
 ## Default flow for a feature
 1. `pm` → spec + task breakdown
 2. `architect` → data model + API contract (optionally `uiux-research` in parallel for design patterns)
-3. **parallel:** `be` (API) + `fe` (UI against the contract)
-4. `uiux-audit` → review the FE result
-5. orchestrator synthesizes → report to human
+3. `security-research` → threat model + security requirements against the contract (feeds `be`/`fe`)
+4. **parallel:** `be` (API) + `fe` (UI against the contract + security requirements)
+5. **parallel review:** `uiux-audit` + `security-audit` → findings route to `be`/`fe` to apply
+6. orchestrator synthesizes → report to human
 
-Adapt the flow to the task: a backend-only fix may need just `architect` + `be`; a pure design question may be just `uiux-research`.
+Adapt the flow to the task: a backend-only fix may need just `architect` + `be`; a pure design question may be just `uiux-research`. Run `security-research`/`security-audit` when the change touches auth, input handling, data exposure, secrets, or dependencies — skip them for trivial changes with no trust boundary.
 
 ## Delegating & fan-out
 
@@ -73,7 +77,7 @@ Delegate by spawning subagents explicitly: the lead receives a task, then spawns
 (`/api/v1/brand` → `be-brand`, each FE area → `fe-<area>`). Fan-out obeys the **concurrency
 rule above**: reads parallel, writes sequential.
 
-- **Read / research / audit fan-out is parallel.** `uiux-research`, `uiux-audit`, and architect exploration may be spawned concurrently (cap at ~3–5 so results stay synthesizable).
+- **Read / research / audit fan-out is parallel.** `uiux-research`, `uiux-audit`, `security-research`, `security-audit`, and architect exploration may be spawned concurrently (cap at ~3–5 so results stay synthesizable). `security-audit` runs read-only scanners only — never state-changing commands. On Codex its `read-only` sandbox enforces this in the kernel (but has no network, so prefer offline scanners).
 - **Write / implementation fan-out is sequential.** Spawn implementation specialists **one at a time** even when slices are disjoint: finish `be-brand`, integrate, then spawn `be-category`.
 
 Rules that keep sequential writes clean:
@@ -87,5 +91,5 @@ Rules that keep sequential writes clean:
 ## Conventions
 - Pass each specialist the *outputs* of upstream specialists (e.g. give BE and FE the Architect's contract verbatim).
 - Specialists return a structured report as their final message — that report is their handoff, not a chat message to the human.
-- Reviewers (`uiux-audit`) are read-only; route their findings to `fe` to apply.
+- Reviewers (`uiux-audit`, `security-audit`) are read-only; route their findings to `be`/`fe` to apply.
 - Do not claim work is done or verified unless the specialist actually ran and verified it.
