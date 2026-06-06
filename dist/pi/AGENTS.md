@@ -64,7 +64,7 @@ Adapt the flow to the task: a backend-only fix may need just `architect` + `be`;
 
 Delegate via the **Agent tool** (`subagent_type` = the role id, e.g. `be`, `architect`). Specialists are defined in `.pi/agents/` and loaded by the `@tintinweb/pi-subagents` community extension. Pi reads this manual from `AGENTS.md`; each agent's `model` frontmatter key is authoritative for that role.
 
-**Two-part install required.** Roster files under `.pi/agents/` are inert until the extension is installed (`pi install npm:@tintinweb/pi-subagents`) and the project folder is trusted. Trust gate: Pi activates project files only after the user runs the trust prompt for the project.
+**Two-part install required.** Roster files under `.pi/agents/` are inert until the extension is installed and the project folder is trusted. The extension is a **third-party community package** (MIT, maintained outside anyteam) — installing it is opt-in — at your discretion, pinned to a version you've reviewed: `pi install npm:@tintinweb/pi-subagents@0.10.0`. Trust gate: Pi activates project files only after the user runs the trust prompt for the project.
 
 Per-agent tool restrictions are enforced via the `tools` key (comma-separated allowlist). Read-only and research roles are restricted to `read, grep, find, ls`; full-policy roles inherit all tools.
 

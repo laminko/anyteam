@@ -302,7 +302,28 @@ install_harness() {
     if [ "$DRY_RUN" = "0" ]; then
         echo ""
         if [ "$_harness" = "pi" ]; then
-            echo "Note: Pi subagents require the extension — run:  pi install npm:@tintinweb/pi-subagents"
+            _pi_pkg="npm:@tintinweb/pi-subagents@0.10.0"
+            echo "Pi subagents need a separate, THIRD-PARTY community extension to work:"
+            echo "  @tintinweb/pi-subagents (MIT, maintained outside anyteam)."
+            _ans="n"
+            if [ -t 0 ]; then
+                printf "  Install it now via 'pi install %s'? [y/N] " "$_pi_pkg"
+                read -r _ans || _ans="n"
+            fi
+            case "$_ans" in
+                y|Y|yes|YES)
+                    if command -v pi >/dev/null 2>&1; then
+                        echo "  Running: pi install ${_pi_pkg}"
+                        pi install "${_pi_pkg}" || echo "  pi install failed — run it manually when ready."
+                    else
+                        echo "  'pi' is not on PATH. Once Pi is installed, run:  pi install ${_pi_pkg}"
+                    fi
+                    ;;
+                *)
+                    echo "  Skipped (opt-in). To enable Pi subagents later, run:"
+                    echo "    pi install ${_pi_pkg}"
+                    ;;
+            esac
         fi
         echo "[${_harness}] done — added: ${_added}, skipped: ${_skipped}"
     fi

@@ -50,8 +50,25 @@ The installer is **no-clobber by default** (it skips files that already exist; p
 ### Per-harness notes
 - **Codex** installs the roster **user-level** at `~/.codex/agents/` (honors `$CODEX_HOME`)
   to avoid a project-scope spawn bug; the manual still lands in the project as `AGENTS.md`.
-- **Pi** needs the subagents extension — after install, run
-  `pi install npm:@tintinweb/pi-subagents`. The installer reminds you.
+- **Pi** installs only the (inert) roster files by default. Making its subagents
+  *work* requires a **separate, third-party community extension** — see
+  [Enabling Pi subagents](#enabling-pi-subagents-opt-in) below. The installer **asks
+  for your consent** before installing it.
+
+### Enabling Pi subagents (opt-in)
+
+The Pi roster does nothing until you install [`@tintinweb/pi-subagents`](https://www.npmjs.com/package/@tintinweb/pi-subagents)
+— a **third-party community package** (MIT, maintained outside anyteam). This is the
+only step in `anyteam` that runs code from outside this repo on your machine, so it's
+**opt-in** — the installer **asks** (default: no) before installing it, and you can also
+run it yourself, pinned to a version you've reviewed:
+
+```bash
+pi install npm:@tintinweb/pi-subagents@0.10.0
+```
+
+Then trust the project folder when Pi prompts. (Without the extension, the `.pi/agents/`
+files are simply ignored — nothing breaks.)
 
 ## After install: ground the team
 

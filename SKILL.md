@@ -21,8 +21,9 @@ With no `--harness` it auto-detects from the project; inside Claude Code that re
 to `claude-code`. Supported harnesses: **claude-code, opencode, gemini, codex, pi**.
 It copies the 6 agents into the harness's roster directory (no-clobber) and writes the
 team manual as the harness's instruction file. Report what was added/skipped and any
-per-harness note the installer prints (Codex installs the roster user-level; Pi needs
-the `@tintinweb/pi-subagents` extension).
+per-harness note the installer prints (Codex installs the roster user-level; Pi subagents
+need a separate, opt-in third-party extension — the installer asks the user for consent,
+default no, before installing it).
 
 ## 2. Intake (you, the lead)
 Follow `<SKILL_DIR>/INTAKE.md`: scan the codebase and fill the `## Project brief`

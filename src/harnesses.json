@@ -72,7 +72,7 @@
         "read-only": { "tools": "read, grep, find, ls" },
         "research":  { "tools": "read, grep, find, ls" }
       },
-      "extension": "@tintinweb/pi-subagents",
+      "extension": "@tintinweb/pi-subagents@0.10.0",
       "delegation_snippet": "pi.md"
     }
   }
