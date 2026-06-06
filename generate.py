@@ -55,7 +55,7 @@ SNIPPETS_DIR = os.path.join(SRC_DIR, "snippets")
 MANUAL_SRC = os.path.join(SRC_DIR, "manual.md")
 
 # Deterministic role iteration order — do NOT rely on glob/fs order.
-ROLE_ORDER = ["pm", "architect", "be", "fe", "uiux-audit", "uiux-research"]
+ROLE_ORDER = ["pm", "architect", "be", "fe", "uiux-audit", "uiux-research", "security-audit"]
 
 VALID_MODEL_TIERS = {"heavy", "light"}
 VALID_TOOL_POLICIES = {"full", "read-only", "research", "audit"}
